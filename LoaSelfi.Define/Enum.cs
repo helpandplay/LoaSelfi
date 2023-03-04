@@ -1,6 +1,6 @@
 namespace LoaSelfi.Define;
 public enum ImageType
 {
-    Selfi,
+    Selfie,
     Screenshot
 }

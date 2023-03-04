@@ -1,7 +1,6 @@
 ﻿using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace LoaSelfi.Service;
 public class Finder
@@ -27,12 +26,7 @@ public class Finder
         }
     }
 
-    public Task<string> GetFolderPathTask()
-    {
-        return new Task<string>(() => GetFolderPathAllSerachDrives());
-    }
-
-    private string GetFolderPathAllSerachDrives()
+    public string GetFolderPathAllSerachDrives()
     {
         string lostArkScreenShotFolderPath = string.Empty;
 

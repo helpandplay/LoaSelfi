@@ -2,15 +2,16 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using LoaSelfi.Define;
 using LoaSelfi.Model;
 
 namespace LoaSelfi.Service;
-public class FileLoader
+public class ImageFileLoader
 {
     private readonly string _lostarkScreenShotExtension = ".jpg";
-    public FileLoader()
+    public ImageFileLoader()
     {
 
     }
@@ -26,6 +27,25 @@ public class FileLoader
 
         return files;
     }
+
+    public static string[]? GetImageFileNames(string[] fileNames)
+    {
+        if(fileNames == null ||
+           fileNames.Length == default(int))
+        {
+            return null;
+        }
+
+        IList<string> imageFiles = new List<string>(fileNames.Length);
+
+        foreach(var fileName in fileNames)
+        {
+
+        }
+
+        return imageFiles.ToArray();
+    }
+
     public ImageInfo? LoadImageAsync(string fileName)
     {
         if(Path.GetExtension(fileName) != _lostarkScreenShotExtension)
@@ -61,9 +81,9 @@ public class FileLoader
         }
         else if(fileNameSplit.Length == 4 &&
                 fileNameSplit[0] != null &&
-                fileNameSplit[0] == ImageType.Selfi.ToString())
+                fileNameSplit[0] == ImageType.Selfie.ToString())
         {
-            imageType = ImageType.Selfi;
+            imageType = ImageType.Selfie;
         }
 
         if(imageType == null)
@@ -103,17 +123,5 @@ public class FileLoader
 
             return Images;
         });
-    }
-
-    private DateTime ConvertStringToDateTime(string[] time)
-    {
-        int year = 2000 + int.Parse(time[0].Substring(0, 2));
-        int month = int.Parse(time[0].Substring(2, 2));
-        int day = int.Parse(time[0].Substring(4, 2));
-        int hour = int.Parse(time[1].Substring(0, 2));
-        int minute = int.Parse(time[1].Substring(2, 2));
-        int second = int.Parse(time[1].Substring(4, 2));
-
-        return new DateTime(year, month, day, hour, minute, second);
     }
 }

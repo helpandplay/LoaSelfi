@@ -5,7 +5,7 @@ public class FileLoaderUnitTest
     public void GetImagesTest()
     {
         string myLOSTARKFolderPath = @"C:\Program Files (x86)\Smilegate\Games\LOSTARK\EFGame\Screenshots";
-        var fileLoader = new Service.FileLoader();
+        var fileLoader = new Service.ImageFileLoader();
 
         var getImagesTask = fileLoader.LoadImagesAsync(myLOSTARKFolderPath);
 

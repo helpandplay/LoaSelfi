@@ -26,7 +26,7 @@ public partial class MainViewModel : ViewModelBase
     public MainViewModel()
     {
         var finder = Finder.Instance;
-        var fileLoader = new Service.FileLoader();
+        var fileLoader = new Service.ImageFileLoader();
 
         ViewModels = new List<ViewModelBase>()
         {

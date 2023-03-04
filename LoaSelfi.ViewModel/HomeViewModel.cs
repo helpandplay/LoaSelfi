@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -38,10 +39,38 @@ public partial class HomeViewModel : ViewModelBase
         }
     }
 
-    public Service.Finder Finder { get; }
-    public FileLoader FileLoader { get; }
+    private bool _IsLoadedImages = false;
+    public bool IsLoadedImages
+    {
+        get
+        {
+            return _IsLoadedImages;
+        }
+        set
+        {
+            _IsLoadedImages = value;
+            OnPropertyChanged(nameof(IsLoadedImages));
+        }
+    }
 
-    public HomeViewModel(Service.Finder finder, Service.FileLoader fileLoader)
+    private string _ProgressText = string.Empty;
+    public string ProgressText
+    {
+        get
+        {
+            return _ProgressText;
+        }
+        set
+        {
+            _ProgressText = value;
+            OnPropertyChanged(nameof(ProgressText));
+        }
+    }
+
+    public Service.Finder Finder { get; }
+    public ImageFileLoader FileLoader { get; }
+
+    public HomeViewModel(Service.Finder finder, Service.ImageFileLoader fileLoader)
     {
         this.Finder = finder;
         this.FileLoader = fileLoader;
@@ -49,31 +78,42 @@ public partial class HomeViewModel : ViewModelBase
         LoadImages();
     }
 
-    private void LoadImages()
+    private async void LoadImages()
     {
-        var task = Finder.GetFolderPathTask();
+        string folderPath = await Task.Run(() => Finder.GetFolderPathAllSerachDrives());
 
-        task.Start();
-
-        task.ContinueWith(folderPath =>
+        await Task.Run(() =>
         {
-            var files = FileLoader.GetFiles(folderPath.Result);
+            string[] files = ImageFileLoader.GetFiles(folderPath);
+            string baseProgressText = $"{files.Length} Loading...";
+
+            int cnt = 0;
+            ProgressText = $"{cnt} / {baseProgressText}";
 
             foreach(var file in files)
             {
                 Task<ImageInfo?> imageInfoTask = Task.Factory.StartNew(() => FileLoader.LoadImageAsync(file));
-                imageInfoTask.ContinueWith(imageInfo =>
+                var completedLoadImageTask = imageInfoTask.ContinueWith(imageInfo =>
                 {
-                    if(imageInfo.Result != null)
+                    if(imageInfo.Result == null)
                     {
-                        Application.Current.Dispatcher.BeginInvoke(
-                            System.Windows.Threading.DispatcherPriority.Background,
-                            new Action(delegate
-                            {
-                                ImageInfos.Add(imageInfo.Result);
-                            })
-                        );
+                        return;
                     }
+
+                    Application.Current.Dispatcher.BeginInvoke(
+                        System.Windows.Threading.DispatcherPriority.Background,
+                        new Action(delegate
+                        {
+                            ImageInfos.Add(imageInfo.Result);
+                            Interlocked.Increment(ref cnt);
+                            ProgressText = $"{cnt} / {baseProgressText}";
+
+                            if(cnt == files.Length)
+                            {
+                                IsLoadedImages = true;
+                            }
+                        })
+                    );
                 });
             }
         });

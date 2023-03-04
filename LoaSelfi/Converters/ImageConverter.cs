@@ -6,7 +6,7 @@ using System.Windows.Data;
 
 namespace LoaSelfi.Converters
 {
-    public class ImageConverter : IValueConverter
+    internal class ImageConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
